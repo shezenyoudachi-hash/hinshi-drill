@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>品詞と働きドリル</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Libre+Baskerville:wght@700&display=swap" rel="stylesheet">
+<style>
+/* VOICE: 落ち着いた自習ノート。余計な装飾なし
+   IDEA: 参考書の練習問題に赤ペンで品詞と矢印を書き込むワークブック
+   PICTURE: 大きな英文そのもの。下に品詞ラベルと赤い修飾の矢印が描かれる
+   COLOUR and TYPE: 紙の白・墨色・赤ペンのマゼンタ。英文はBaskerville、日本語はNoto Sans JP
+   LAYOUT: Lessonタブ→進捗→英文と矢印→選択パネル→答え合わせ */
+:root{color-scheme:light dark;--bg:light-dark(#fbfaf6,#17161a);--card:light-dark(#ffffff,#211f25);--ink:light-dark(#1b1a1f,#ecebef);--sub:light-dark(#6b6872,#a3a0aa);--line:light-dark(#e3e0d8,#34313a);--red:light-dark(#b0185a,#ff6fa8);--ok:light-dark(#1d7a4a,#5fd39a);--ng:light-dark(#c0392b,#ff7b6b);--chip:light-dark(#f2efe8,#2b2930)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Noto Sans JP",system-ui,sans-serif;overflow-x:clip}
+.wrap{max-width:760px;margin:0 auto;padding:20px max(4vw,14px) 48px}
+h1{font-size:clamp(24px,5vw,32px);line-height:1.1;margin:0 0 4px}
+.lead{color:var(--sub);font-size:14px;margin:0 0 14px}
+.tabs{display:flex;gap:6px;overflow-x:auto;margin-bottom:12px;padding-bottom:2px}
+.tab{flex:none;min-height:44px;padding:6px 14px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-size:14px;cursor:pointer;text-align:left;line-height:1.25}
+.tab small{display:block;font-size:11px;color:var(--sub)}
+.tab.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}.tab.on small{color:var(--bg);opacity:.75}
+.bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.dots{display:flex;gap:5px;flex-wrap:wrap;flex:1}
+.dot{width:28px;height:28px;border-radius:50%;border:1px solid var(--line);background:var(--card);font-size:12px;color:var(--sub);cursor:pointer;padding:0}
+.dot.mc{border-radius:7px}
+.dot.done{background:var(--ok);color:#fff;border-color:var(--ok)}
+.dot.cur{outline:2px solid var(--red);outline-offset:1px}
+.score{font-size:14px;color:var(--sub);white-space:nowrap}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 16px}
+.qno{font-size:13px;color:var(--sub);margin:0 0 6px}
+.scroll{overflow-x:auto;padding-bottom:4px}
+.row{position:relative;display:flex;gap:16px;padding:4px 6px 70px;width:max-content;min-width:100%;justify-content:center}
+.col{display:flex;flex-direction:column;align-items:center;cursor:pointer;border-radius:10px;padding:4px 5px;border:2px solid transparent;background:none;color:inherit;font:inherit}
+.col.tight{margin-left:-14px}
+.col:focus-visible{outline:2px solid var(--red)}
+.col.sel{background:var(--chip);border-color:var(--red)}
+.col.ok{border-color:var(--ok)}.col.ng{border-color:var(--ng)}
+.ja{font-size:12px;color:var(--sub);white-space:nowrap;min-height:19px}
+.en{font:700 clamp(21px,5.2vw,29px)/1.2 "Libre Baskerville",Georgia,serif;white-space:nowrap}
+.pos{margin-top:4px;min-width:34px;height:26px;border-bottom:2px dashed var(--line);color:var(--red);font-weight:700;font-size:16px;text-align:center;white-space:nowrap}
+.pos sup{font-size:11px}.pos .x{color:var(--sub);font-weight:400}
+svg.arcs{position:absolute;left:0;bottom:0;height:66px;pointer-events:none;overflow:visible}
+.panel{margin-top:14px;border-top:1px solid var(--line);padding-top:14px}
+.panel h3{font-size:15px;margin:0 0 8px}
+.panel h3 b{font-family:"Libre Baskerville",Georgia,serif}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.b{min-height:44px;padding:8px 14px;border-radius:10px;border:1px solid var(--line);background:var(--chip);color:var(--ink);font:inherit;font-size:15px;cursor:pointer;text-align:left}
+.b.on{background:var(--red);border-color:var(--red);color:#fff}
+.b.right{background:var(--ok);border-color:var(--ok);color:#fff}
+.b.wrong{background:var(--ng);border-color:var(--ng);color:#fff}
+.b:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+.mcq{font-size:18px;font-weight:700;margin:4px 0 14px;line-height:1.5}
+.mcq em{font-style:normal;font-family:"Libre Baskerville",Georgia,serif;background:var(--chip);padding:1px 6px;border-radius:6px}
+.mco{display:grid;gap:8px}
+.hint{font-size:13px;color:var(--sub);margin:0}
+.acts{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.main{background:var(--ink);color:var(--bg);border-color:var(--ink);font-weight:700;flex:1;text-align:center}
+.res{margin-top:14px;padding:14px;border-radius:10px;background:var(--chip);display:none}
+.res.show{display:block}
+.res .v{font-weight:700;font-size:17px;margin:0 0 6px}
+.res .v.ok{color:var(--ok)}.res .v.ng{color:var(--ng)}
+.res p{margin:4px 0;font-size:15px}
+.ans{font-family:"Libre Baskerville",Georgia,serif;font-size:14px;overflow-wrap:anywhere}
+.mode{display:flex;gap:6px;margin-bottom:12px}.mode .b{flex:1;text-align:center}
+.notes{margin:0;padding-left:1.2em}.notes li{margin:0 0 10px;line-height:1.7}.notes b{color:var(--red)}.notes i{font-family:"Libre Baskerville",Georgia,serif;font-style:normal}
+.legend{margin-top:18px;font-size:13px;color:var(--sub);line-height:1.8}
+.legend b{color:var(--red)}
+.reset{background:none;border:none;color:var(--sub);text-decoration:underline;font:inherit;font-size:13px;cursor:pointer;padding:8px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>品詞と働きドリル</h1>
+  <p class="lead">薬袋善郎『英語リーディング教本』に沿った自作の練習問題。各Lessonの要点を読んでから問題へ。丸い番号は英文の分析、四角い番号は確認問題です。</p>
+  <div class="tabs" id="tabs"></div>
+  <div class="mode" id="mode"><button class="b" data-m="learn">要点を読む</button><button class="b" data-m="drill">問題を解く</button></div>
+  <div class="bar" id="barw"><div class="dots" id="dots"></div><span class="score" id="score"></span></div>
+  <div class="card">
+    <p class="qno" id="qno"></p>
+    <div id="body"></div>
+    <div class="acts">
+      <button class="b" id="prev">← 前へ</button>
+      <button class="b main" id="check">答え合わせ</button>
+      <button class="b" id="next">次へ →</button>
+    </div>
+    <div class="res" id="res"></div>
+  </div>
+  <p class="legend" id="legend"></p>
+  <button class="reset" id="reset">このLessonの進捗をリセット</button>
+</div>
+<script>
+{
+// 分析問題の各語: [英語, 意味, 記号, 修飾先(番号) / 'C'=補語 / null=なし / '*'=判定しない]
+// 記号: n v a ad S V I(誘導ad) X(冠詞＝何も書かない)
+const P=(w,tr,ex)=>({t:"p",w,tr,ex});
+const M=(q,o,a,ex)=>({t:"m",q,o,a,ex});
+const LS=[
+{name:"Lesson 1",notes:["<b>品詞</b>は語の種類、<b>働き</b>はその語が他の語に対してもつ関係。この2つは厳密に区別する。", "<b>名詞 n</b>：生物・物体・事柄の名称。<b>動詞 v</b>：行動・動き・変化を表す語。", "<b>形容詞 a</b>：どんな名詞かを説明する語。働きは<b>名詞修飾</b>か<b>補語</b>の2つだけ。", "<b>修飾</b>＝他の語の助けを借りずに直接説明すること。矢印で示す。", "<b>補語 C</b>＝動詞の助けを借りて、間接的に名詞を説明する働き（That milk became <i>cold</i>）。形容詞の補語は ªC と書く。", "<b>副詞 ad</b>：動詞（いつ・どこで・どのように）、形容詞、他の副詞を修飾する。文全体を修飾することもある。", "同じつづりでも品詞は文の中での役割で決まる（a <i>fast</i> car は a、run <i>fast</i> は ad）。"],sub:"4つの品詞",keys:["n","v","a","ad"],items:[
+ P([["run","走る","v",null],["very","非常に","ad",2],["fast","速く","ad",0]],"非常に速く走る","fast は動詞 run を修飾する副詞。very は副詞 fast を修飾する副詞（他の副詞修飾）です。"),
+ P([["drink","飲む","v",null],["hot","熱い","a",2],["coffee","コーヒー","n",null]],"熱いコーヒーを飲む","hot は名詞 coffee を直接説明しているので形容詞、働きは名詞修飾です。"),
+ P([["extremely","極めて","ad",1],["beautiful","美しい","a",2],["flowers","花","n",null]],"極めて美しい花","beautiful は flowers を修飾する形容詞。extremely は形容詞 beautiful を修飾する副詞です。"),
+ P([["This","この","a",1],["soup","スープ","n",null],["tastes","味がする","v",null],["really","本当に","ad",4],["good","良い","a","C"]],"このスープは本当においしい","This は soup を直接説明する名詞修飾。good は動詞 tastes の助けを借りて soup を説明するので補語。really は good を修飾する副詞。"),
+ P([["speak","話す","v",null],["quite","かなり","ad",2],["slowly","ゆっくり","ad",0]],"かなりゆっくり話す","slowly は動詞 speak を修飾する副詞、quite は副詞 slowly を修飾する副詞です。"),
+ P([["drive","運転する","v",null],["fast","速い","a",2],["cars","車","n",null]],"速い車を運転する","ここの fast は名詞 cars を説明しているので形容詞。同じ fast でも何を説明するかで品詞が変わります。"),
+ P([["drive","運転する","v",null],["cars","車","n",null],["fast","速く","ad",0]],"車を速く運転する","こちらの fast は動詞 drive を「どのように」と説明しているので副詞です。"),
+ P([["That","その","a",1],["girl","少女","n",null],["became","なった","v",null],["very","非常に","ad",4],["famous","有名な","a","C"]],"その少女はとても有名になった","That は girl を修飾。famous は became の助けを借りて girl を説明する補語。very は famous を修飾する副詞。"),
+ P([["completely","完全に","ad",1],["new","新しい","a",2],["information","情報","n",null]],"完全に新しい情報","new は information を修飾する形容詞、completely は形容詞 new を修飾する副詞です。"),
+ P([["come","来る","v",null],["home","家へ","ad",0],["early","早く","ad",0]],"早く家に帰る","home（どこへ）と early（いつ）は、どちらも動詞 come を修飾する副詞です。"),
+ P([["really","本当に","ad",1],["kind","親切な","a","*"]],"本当に親切な","kind は形容詞。名詞修飾か補語かはこの2語だけではわからないので、品詞だけ合っていれば正解です。"),
+ P([["eat","食べる","v",null],["delicious","おいしい","a",3],["fresh","新鮮な","a",3],["fruit","果物","n",null]],"おいしい新鮮な果物を食べる","delicious も fresh も名詞 fruit を修飾する形容詞。形容詞どうしは修飾しあいません。"),
+ P([["Those","それらの","a",1],["students","学生たち","n",null],["look","見える","v",null],["very","とても","ad",4],["tired","疲れた","a","C"]],"その学生たちはとても疲れているように見える","tired は look の助けを借りて students を説明する補語です。"),
+ P([["work","働く","v",null],["very","非常に","ad",2],["hard","熱心に","ad",0]],"非常に熱心に働く","hard は動詞 work を修飾する副詞、very は副詞 hard を修飾する副詞です。")
+]},
+{name:"Lesson 2",notes:["動詞の形は<b>原形・現在形・過去形・過去分詞形・ing形</b>の5つ。まとめて<b>活用</b>と呼ぶ。未来形という活用はない。", "「活用を言いなさい」→ 原形・過去形・過去分詞形の3つを答える（eat—ate—eaten）。", "<b>規則活用</b>：過去形・過去分詞形が原形＋ed。そうでないものは不規則活用。", "この本では Lesson 5 まで現在形と過去形の動詞しか出てこない約束（だから began や bought は過去形と決まる）。", "代名詞は原則として名詞として扱う。", "<b>所有格</b>（my, your, Tom's）は「品詞は形容詞、働きは名詞修飾、呼び名は所有格」。", "<b>冠詞</b>（a, an, the）は名詞を修飾する特殊な形容詞。下には品詞も働きも書かない。", "a/an：数えられる単数の名詞に付く。the：聞き手にわかるはずの名詞、一つしかないもの、「〜というもの」（総称）に付く。", "<b>名詞＋名詞</b>で1つの名詞になることがある（bus stop）。下線を引いて n と書く。"],sub:"活用・所有格・冠詞",keys:["n","v","a","ad","X"],items:[
+ P([["opened","開けた","v",null],["the","","X",null],["old","古い","a",3],["door","ドア","n",null]],"古いドアを開けた","冠詞 the の下には何も書きません。old は door を修飾する形容詞です。"),
+ P([["Ken's","ケンの","a",2],["new","新しい","a",2],["bike","自転車","n",null]],"ケンの新しい自転車","Ken's は「品詞は形容詞、働きは名詞修飾、呼び名は所有格」。new も bike を修飾します。"),
+ P([["wrote","書いた","v",null],["a","","X",null],["long","長い","a",3],["letter","手紙","n",null]],"長い手紙を書いた","不定冠詞 a も品詞・働きは記入しません。long は letter を修飾する形容詞です。"),
+ P([["your","あなたの","a",1],["tennis racket","テニスラケット","n",null]],"あなたのテニスラケット","tennis racket は名詞＋名詞で1つの名詞。your はそれを修飾する所有格の形容詞です。"),
+ P([["ate","食べた","v",null],["an","","X",null],["apple","リンゴ","n",null],["yesterday","昨日","ad",0]],"昨日リンゴを食べた","yesterday は「いつ」食べたかを説明するので、動詞 ate を修飾する副詞です。"),
+ P([["her","彼女の","a",2],["kind","親切な","a",2],["smile","笑顔","n",null]],"彼女の優しい笑顔","her（所有格）も kind も名詞 smile を修飾する形容詞です。"),
+ P([["taught","教えた","v",null],["science","理科","n",null],["very","非常に","ad",3],["clearly","わかりやすく","ad",0]],"理科を非常にわかりやすく教えた","clearly は動詞 taught を修飾、very は副詞 clearly を修飾します。"),
+ P([["the","","X",null],["bus stop","バス停","n",null]],"そのバス停","bus stop は名詞＋名詞で1つの名詞。the には何も書きません。"),
+ M("動詞の5つの形をすべて正しく並べたものは？",["原形・現在形・過去形・過去分詞形・ing形","原形・現在形・過去形・未来形・ing形","原形・現在分詞形・過去形・過去分詞形・ing形"],0,"活用は5つ。「未来形」という活用はなく、この本では ing形を現在分詞形とは呼びません。"),
+ M("<em>eat</em> の活用を言いなさい（原形—過去形—過去分詞形）",["eat—ate—eaten","eat—eated—eated","eat—ate—ate"],0,"eat は不規則活用です。「活用を言いなさい」と言われたら、原形・過去形・過去分詞形の3つを答えます。"),
+ M("<em>made</em> は何形？（この本は Lesson 5 まで現在形と過去形しか出ない約束）",["原形","現在形","過去形"],2,"make—made—made。made は過去形か過去分詞形ですが、この約束のもとでは過去形です。"),
+ M("<em>my</em>・<em>your</em>・<em>Tom's</em> の品詞と働きは？",["形容詞・名詞修飾","名詞・主語","代名詞・名詞修飾"],0,"これらは「品詞は形容詞、働きは名詞修飾、呼び名は所有格」と扱います。"),
+ M("規則活用とは？",["過去形と過去分詞形が原形に ed を付けたつづりになる活用","現在形に s が付く活用","5つの形がすべて同じつづりになる活用"],0,"answer—answered—answered のように ed が付くのが規則活用です。")
+]},
+{name:"Lesson 3",notes:["<b>主語 S</b>：動詞の行動・変化の主体となる名詞。主語になれるのは名詞（相当語句）だけ。主語の品詞は書かなくてよい。", "<b>述語動詞 V</b>：主語とセットになる動詞。大文字の V で表す。", "<b>文＝構造上の主語＋述語動詞</b>。英文（大文字で始まりピリオドで終わる語群）とは区別する。", "<b>現在形・過去形の動詞は絶対に述語動詞になる</b>。逆に、動詞は述語動詞にならないこともある。", "<b>be動詞</b>：意味は「ある・いる・存在する」と「〜である」の2つ。活用は be—am, is, are—was, were—been—being。", "be動詞以外の動詞は<b>一般動詞</b>。", "<b>誘導副詞 there</b>：述語動詞を主語の前に引き出す（There V S.）。there 自体に意味はなく、下に「誘導ad」と書く。", "状態を表す語が形容詞か動詞か（familiar／know）、形容詞の補語か副詞の動詞修飾か（felt hungry／felt differently）は辞書で確かめる。"],sub:"文・be動詞・誘導副詞 there",keys:["S","V","n","a","ad","I","X"],items:[
+ P([["Mike","マイク","S",null],["quickly","すぐに","ad",2],["finished","終えた","V",null],["his","彼の","a",4],["homework","宿題","n",null]],"マイクはすぐに宿題を終えた","finished は過去形なので絶対に述語動詞（V）。Mike finished で「構造上の主語＋述語動詞」＝文です。"),
+ P([["The","","X",null],["room","部屋","S",null],["was","だった","V",null],["quiet","静かな","a","C"]],"その部屋は静かだった","was は be動詞の過去形で「〜であった」。quiet は was の助けを借りて room を説明する補語です。"),
+ P([["There","","I",null],["are","ある","V",null],["many","たくさんの","a",3],["stars","星","S",null],["tonight","今夜","ad",1]],"今夜はたくさんの星が出ている","There は誘導副詞で、述語動詞 are を主語 stars の前に引き出しています。tonight は are を修飾します。"),
+ P([["My","私の","a",1],["father","父","S",null],["became","なった","V",null],["angry","怒った","a","C"]],"父は怒った","angry は became の助けを借りて father を説明する補語です。"),
+ P([["She","彼女","S",null],["sang","歌った","V",null],["beautifully","美しく","ad",1]],"彼女は美しく歌った","beautifully は「どのように」歌ったかを説明するので、動詞を修飾する副詞です。次の問題と比べてください。"),
+ P([["She","彼女","S",null],["looked","見えた","V",null],["beautiful","美しい","a","C"]],"彼女は美しく見えた","beautiful は形容詞で、looked の助けを借りて She を説明する補語。「美しく」と訳しても副詞ではありません。"),
+ P([["Your","あなたの","a",1],["bag","かばん","S",null],["is","ある","V",null],["here","ここに","ad",2]],"あなたのかばんはここにある","is は「ある・いる・存在する」の意味。here は is を修飾する副詞です。"),
+ P([["The","","X",null],["children","子供たち","S",null],["played","遊んだ","V",null],["happily","楽しく","ad",2]],"子供たちは楽しく遊んだ","happily は played を修飾する副詞です。"),
+ M("文とは？",["構造上の主語＋述語動詞","大文字で始まりピリオドで終わる語群","主語＋目的語"],0,"大文字で始まりピリオドで終わる語群は「英文」と呼んで区別します。"),
+ M("過去形の動詞は絶対に何になる？",["述語動詞","主語","補語"],0,"現在形・過去形の動詞は絶対に述語動詞になり、文を作ります。"),
+ M("be動詞の活用（5つ全部）は？",["be—am, is, are—was, were—been—being","be—is—was—been—being","be—am, is, are—was, were—being—been"],0,"5つの形がすべて違うつづりになるのは be動詞だけです。"),
+ M("誘導副詞 there の働きは？",["述語動詞を主語の前に引き出す","「そこに」という場所を表す","主語になる"],0,"誘導副詞の there 自体は意味を持ちません。下には「誘導ad」と書きます。")
+]},
+{name:"Lesson 4",notes:["名詞＋'s で所有格（形容詞）になる。複数形の名詞は ' だけを付ける（those birds' nest）。", "代名詞の所有格：my, our, your, his, her, its, their, whose。<b>its</b>（それの）と <b>it's</b>（it is の短縮形）を混同しない。", "名詞は<b>数えられる（C）</b>か<b>数えられない（U）</b>かに分かれ、意味によって変わる（a chicken＝鶏、chicken＝鶏肉）。", "<b>3単現の s</b>：主語が3人称・単数で現在形のとき、一般動詞に付く。付いていれば「現在形＝述語動詞」で「主語は3人称単数」とわかる。have→has、do→does。", "be動詞は主語に合わせて使い分ける：I am / I was、You are / You were、単数 is / was、複数 are / were。", "短縮形：I'm、It's、You're（主語＋be動詞）、isn't、aren't、wasn't、weren't（be動詞＋not）。amn't とは言わない。not は動詞を修飾する副詞。", "天気・時間を表す it は形式的な主語なので「それ」と訳さない。", "<b>副詞的属格の s</b>：always、sometimes、nowadays などの末尾の s（副詞の印）。", "<b>所有代名詞</b>（mine, ours, yours, his, hers, theirs）は「〜のもの」という意味の名詞。", "<b>独立所有格</b>：後ろの名詞が省略された所有格（John's＝John's desk）。名詞として扱う。", "語尾の s は7種類：複数形の s、3単現の s、副詞的属格の s、所有代名詞の s、所有格の 's、独立所有格の 's、is の短縮形の 's。"],sub:"語尾のs・be動詞(2)",keys:["S","V","n","a","ad","I","X"],items:[
+ P([["My","私の","a",1],["sister","姉","S",null],["always","いつも","ad",3],["walks","歩く","V",null],["home","家へ","ad",3]],"姉はいつも歩いて帰る","walks の s は3単現の s なので walks は現在形＝述語動詞。always の s は副詞的属格の s です。"),
+ P([["It","","S",null],["'s","だ","V",null],["very","とても","ad",3],["cold","寒い","a","C"],["today","今日","ad",1]],"今日はとても寒い","It's は It is の短縮形。It は「天気の it」で「それ」とは訳しません。"),
+ P([["This","この","a",1],["pen","ペン","S",null],["is","だ","V",null],["n't","ない","ad",2],["mine","私のもの","n",null]],"このペンは私のものではない","isn't は is not の短縮形。not は動詞を修飾して否定する副詞です。mine は所有代名詞で名詞です。"),
+ P([["Tom's","トムの","a",1],["dogs","犬たち","S",null],["are","だ","V",null],["noisy","うるさい","a","C"]],"トムの犬たちはうるさい","Tom's は所有格の 's、dogs は複数形の s。主語が複数なので are です。"),
+ P([["That","その","a",1],["bike","自転車","S",null],["is","だ","V",null],["Ken's","ケンのもの","n",null]],"その自転車はケンのものだ","Ken's は Ken's bike の bike が省略された独立所有格で、名詞として扱います。"),
+ P([["Ken","ケン","S",null],["'s","だ","V",null],["sometimes","ときどき","ad",1],["late","遅れた","a","C"]],"ケンはときどき遅刻する","この Ken's は Ken is の短縮形（is の短縮形の 's）。後ろに名詞がないのがヒントです。"),
+ P([["We","私たち","S",null],["'re","だ","V",null],["very","とても","ad",3],["busy","忙しい","a","C"]],"私たちはとても忙しい","We're は We are の短縮形です。"),
+ P([["There","","I",null],["were","いた","V",null],["n't","ない","ad",1],["any","どんな","a",4],["taxis","タクシー","S",null],["outside","外に","ad",1]],"外にはタクシーが1台もいなかった","誘導副詞 There が were を主語 taxis の前に引き出しています。主語が複数なので were。"),
+ M("<em>Emi's</em> a nurse. の <em>'s</em> は？",["is の短縮形の 's","所有格の 's","独立所有格の 's"],0,"Emi's の後ろに a nurse が続き、Emi is a nurse.（エミは看護師だ）という意味になります。"),
+ M("<em>sometimes</em> の語尾の s は？",["副詞的属格の s","複数形の s","3単現の s"],0,"besides, nowadays, sometimes などの s は副詞的属格の s（副詞の印の s）です。"),
+ M("<em>My parents (　) busy yesterday.</em> に入るのは？",["were","was","are"],0,"主語は複数で、yesterday があるので過去形。複数の過去形は were です。"),
+ M("<em>Mary put her bag here.</em> の put は何形？",["過去形","現在形","原形"],0,"put—put—put。主語が3人称単数なのに3単現の s がないので、現在形ではなく過去形とわかります。"),
+ M("<em>has</em> の原形は？",["have","has","had"],0,"have の3人称・単数・現在形は haves ではなく has になります。"),
+ M("「それの」を表すのはどちら？",["its","it's"],0,"it's は it is（または it has）の短縮形です。")
+]}
+];
+const KL={n:"n　名詞",v:"v　動詞",a:"a　形容詞",ad:"ad　副詞",S:"S　主語",V:"V　述語動詞",I:"誘導ad",X:"冠詞（書かない）"};
+const LB={I:"誘導ad",X:'<span class="x">—</span>'};
+const KEY="hinshi-drill-v2";
+let done={};try{done=JSON.parse(localStorage.getItem(KEY)||"{}")}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(done))}catch(e){}};
+const sels={},picks={};
+let L=0,cur=0,act=0,checked=false,mode="learn";
+const $=id=>document.getElementById(id);
+const items=()=>LS[L].items, it=()=>items()[cur], k=()=>L+"-"+cur;
+const sel=()=>sels[k()]||(sels[k()]=it().w.map(()=>({p:null,t:null})));
+const lab=(p,t)=>!p?"":LB[p]||(t==="C"?p+"<sup>C</sup>":p);
+const tight=w=>/^'|^n't/.test(w);
+
+function tabs(){$("tabs").innerHTML=LS.map((l,i)=>`<button class="tab${i===L?" on":""}" data-l="${i}">${l.name}<small>${l.sub}</small></button>`).join("")}
+function dots(){
+  const n=items().filter((_,i)=>done[L+"-"+i]).length;
+  $("dots").innerHTML=items().map((q,i)=>`<button class="dot${q.t==="m"?" mc":""}${done[L+"-"+i]?" done":""}${i===cur?" cur":""}" data-i="${i}" aria-label="問題${i+1}">${i+1}</button>`).join("");
+  $("score").textContent=`正解 ${n} / ${items().length}`;
+}
+function ok(i){const w=it().w[i],s=sel()[i];return s.p===w[2]&&(w[3]==="*"||s.t===w[3])}
+function bodyP(){
+  const q=it(),s=sel();
+  let h=`<div class="scroll"><div class="row" id="row">`+q.w.map((w,i)=>{
+    let c="col"+(tight(w[0])?" tight":"");if(checked)c+=ok(i)?" ok":" ng";else if(i===act)c+=" sel";
+    return `<button class="${c}" data-i="${i}"><span class="ja">${w[1]}</span><span class="en">${w[0]}</span><span class="pos">${lab(s[i].p,s[i].t)}</span></button>`;
+  }).join("")+`<svg class="arcs" id="arcs"></svg></div></div><div class="panel">`;
+  const a=s[act],w=q.w[act];
+  h+=`<h3><b>${w[0]}</b> の下に書くのは？</h3><div class="btns">`+LS[L].keys.map(x=>`<button class="b${a.p===x?" on":""}" data-pos="${x}">${KL[x]}</button>`).join("")+`</div>`;
+  if(a.p==="a"||a.p==="ad"){
+    h+=`<h3>働きは？（どの語を修飾する？）</h3><div class="btns">`;
+    q.w.forEach((x,j)=>{if(j!==act)h+=`<button class="b${a.t===j?" on":""}" data-t="${j}">→ ${x[0]}</button>`});
+    if(a.p==="a")h+=`<button class="b${a.t==="C"?" on":""}" data-t="C">補語（C）</button>`;
+    h+=`<button class="b${a.t===null?" on":""}" data-t="none">わからない・なし</button></div>`;
+  }else h+=`<p class="hint">この記号は修飾先を選びません。</p>`;
+  $("body").innerHTML=h+`</div>`;
+  arcs();
+}
+function arcs(){
+  const r=$("row"),svg=$("arcs");if(!r||!svg)return;const s=sel();
+  const cols=[...r.querySelectorAll(".col")];
+  const W=r.scrollWidth;svg.setAttribute("width",W);svg.setAttribute("viewBox",`0 0 ${W} 66`);
+  const cx=i=>cols[i].offsetLeft+cols[i].offsetWidth/2;
+  let p="";
+  s.forEach((x,i)=>{
+    if(typeof x.t!=="number")return;
+    const a=cx(i),b=cx(x.t),d=Math.min(58,18+Math.abs(i-x.t)*11),dir=b>a?-1:1;
+    p+=`<path d="M${a} 4 C${a} ${4+d},${b} ${4+d},${b+dir*3} 8" fill="none" stroke="var(--red)" stroke-width="1.8" marker-end="url(#ah)"/>`;
+  });
+  svg.innerHTML=`<defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--red)"/></marker></defs>`+p;
+}
+function bodyM(){
+  const q=it(),pk=picks[k()];
+  $("body").innerHTML=`<p class="mcq">${q.q}</p><div class="mco">`+q.o.map((o,i)=>{
+    let c="b";if(pk!==undefined){if(i===q.a)c+=" right";else if(i===pk)c+=" wrong"}
+    return `<button class="${c}" data-o="${i}">${o}</button>`}).join("")+`</div>`;
+}
+function ansText(){
+  const q=it();
+  return q.w.map(w=>{const s=w[2]==="I"?"誘導ad":w[2]==="X"?"（記入しない）":w[3]==="C"?"aC":w[2];let t=w[0]+" = "+s;if(typeof w[3]==="number")t+=" → "+q.w[w[3]][0];return t}).join("　/　");
+}
+function render(){
+  tabs();
+  [...$("mode").children].forEach(b=>b.classList.toggle("on",b.dataset.m===mode));
+  const dr=mode==="drill";$("barw").style.display=dr?"":"none";$("legend").style.display=dr?"":"none";$("reset").style.display=dr?"":"none";$("prev").style.display=dr?"":"none";$("next").style.display=dr?"":"none";
+  if(!dr){$("qno").textContent=LS[L].name+"　"+LS[L].sub+"の要点";$("body").innerHTML=`<ol class="notes">${LS[L].notes.map(n=>`<li>${n}</li>`).join("")}</ol>`;$("check").style.display="";$("check").textContent="問題を解く →";$("res").className="res";return}
+  dots();const q=it();
+  $("qno").textContent=`${LS[L].name}　問題 ${cur+1}`+(q.t==="m"?"（確認）":"");
+  const r=$("res");
+  if(q.t==="p"){
+    bodyP();$("check").style.display="";
+    $("check").textContent=checked?"やり直す":"答え合わせ";
+    if(checked){const all=q.w.every((_,i)=>ok(i));
+      r.innerHTML=`<p class="v ${all?"ok":"ng"}">${all?"正解！":"もう一歩。赤枠の語を見直しましょう"}</p><p class="ans">${ansText()}</p><p>訳：${q.tr}</p><p>${q.ex}</p>`;r.className="res show";}
+    else r.className="res";
+  }else{
+    bodyM();const pk=picks[k()];$("check").style.display=pk!==undefined?"":"none";$("check").textContent="やり直す";
+    if(pk!==undefined){r.innerHTML=`<p class="v ${pk===q.a?"ok":"ng"}">${pk===q.a?"正解！":"不正解"}</p><p>${q.ex}</p>`;r.className="res show"}else r.className="res";
+  }
+  $("legend").innerHTML=LS[L].keys.map(x=>`<b>${x==="I"?"誘導ad":x==="X"?"—":x}</b> ${KL[x].replace(/^\S+\s/,"")}`).join("　")+"　／　<b>ªC</b> 形容詞で補語　／　赤い矢印＝修飾";
+}
+function go(i){const n=items().length;cur=(i+n)%n;act=0;checked=false;render()}
+
+$("tabs").addEventListener("click",e=>{const t=e.target.closest(".tab");if(!t)return;L=+t.dataset.l;cur=0;act=0;checked=false;mode="learn";render()});
+$("mode").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;mode=b.dataset.m;act=0;checked=false;render()});
+$("body").addEventListener("click",e=>{
+  const c=e.target.closest(".col");if(c){act=+c.dataset.i;checked=false;render();return}
+  const b=e.target.closest("button");if(!b)return;
+  if(b.dataset.o!==undefined){if(picks[k()]!==undefined)return;const o=+b.dataset.o;picks[k()]=o;if(o===it().a){done[k()]=1;save()}render();return}
+  const s=sel()[act],last=it().w.length-1;
+  if(b.dataset.pos){s.p=b.dataset.pos;s.t=null;if(s.p!=="a"&&s.p!=="ad")act=Math.min(act+1,last)}
+  else if(b.dataset.t){const t=b.dataset.t;s.t=t==="C"?"C":t==="none"?null:+t;act=Math.min(act+1,last)}
+  checked=false;render();
+});
+$("check").addEventListener("click",()=>{
+  if(mode==="learn"){mode="drill";cur=0;act=0;checked=false;render();return}
+  const q=it();
+  if(q.t==="m"){delete picks[k()];render();return}
+  if(checked){sels[k()]=q.w.map(()=>({p:null,t:null}));checked=false;act=0;render();return}
+  checked=true;if(q.w.every((_,i)=>ok(i))){done[k()]=1;save()}render();
+});
+$("prev").addEventListener("click",()=>go(cur-1));
+$("next").addEventListener("click",()=>go(cur+1));
+$("dots").addEventListener("click",e=>{const d=e.target.closest(".dot");if(d)go(+d.dataset.i)});
+$("reset").addEventListener("click",()=>{Object.keys(done).forEach(x=>{if(x.startsWith(L+"-"))delete done[x]});save();render()});
+const ro=new ResizeObserver(arcs);ro.observe($("body"));
+if(document.fonts)document.fonts.ready.then(arcs);
+render();
+}
+</script>
+</body>
+</html>
