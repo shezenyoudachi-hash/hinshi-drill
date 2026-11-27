@@ -67,6 +67,17 @@ svg.arcs{position:absolute;left:0;bottom:0;height:66px;pointer-events:none;overf
 .ans{font-family:"Libre Baskerville",Georgia,serif;font-size:14px;overflow-wrap:anywhere}
 .mode{display:flex;gap:6px;margin-bottom:12px}.mode .b{flex:1;text-align:center}
 .notes{margin:0;padding-left:1.2em}.notes li{margin:0 0 10px;line-height:1.7}.notes b{color:var(--red)}.notes i{font-family:"Libre Baskerville",Georgia,serif;font-style:normal}
+.search{position:relative;margin-bottom:12px}
+.search input{width:100%;min-height:46px;font:inherit;font-size:16px;padding:10px 40px 10px 14px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink)}
+.search input:focus-visible{outline:2px solid var(--red);outline-offset:1px}
+.search button{position:absolute;right:4px;top:4px;width:38px;height:38px;border:none;background:none;color:var(--sub);font-size:20px;cursor:pointer;display:none}
+.hits{display:none;margin-bottom:16px}
+.hits.show{display:block}
+.hitn{font-size:13px;color:var(--sub);margin:0 0 8px}
+.hit{display:block;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px;color:var(--ink);font:inherit;font-size:14px;line-height:1.6;cursor:pointer}
+.hit:focus-visible{outline:2px solid var(--red)}
+.hit small{display:block;color:var(--red);font-weight:700;font-size:12px;margin-bottom:2px}
+.hit mark{background:light-dark(#ffe58a,#6b5600);color:inherit;border-radius:3px;padding:0 1px}
 .legend{margin-top:18px;font-size:13px;color:var(--sub);line-height:1.8}
 .legend b{color:var(--red)}
 .reset{background:none;border:none;color:var(--sub);text-decoration:underline;font:inherit;font-size:13px;cursor:pointer;padding:8px 0}
@@ -76,6 +87,9 @@ svg.arcs{position:absolute;left:0;bottom:0;height:66px;pointer-events:none;overf
 <div class="wrap">
   <h1>品詞と働きドリル</h1>
   <p class="lead">薬袋善郎『英語リーディング教本』に沿った自作の練習問題。各Lessonの要点を読んでから問題へ。丸い番号は英文の分析、四角い番号は確認問題です。</p>
+  <div class="search"><input id="q" type="text" enterkeyhint="search" placeholder="用語・英単語で検索（例：時制の一致、being、補語）" autocomplete="off" aria-label="検索"><button id="qx" aria-label="検索をクリア">×</button></div>
+  <div class="hits" id="hits"></div>
+  <div id="main">
   <div class="tabs" id="tabs"></div>
   <div class="mode" id="mode"><button class="b" data-m="learn">要点を読む</button><button class="b" data-m="drill">問題を解く</button></div>
   <div class="bar" id="barw"><div class="dots" id="dots"></div><span class="score" id="score"></span></div>
@@ -91,6 +105,7 @@ svg.arcs{position:absolute;left:0;bottom:0;height:66px;pointer-events:none;overf
   </div>
   <p class="legend" id="legend"></p>
   <button class="reset" id="reset">このLessonの進捗をリセット</button>
+  </div>
 </div>
 <script>
 {
@@ -1035,6 +1050,44 @@ $("dots").addEventListener("click",e=>{const d=e.target.closest(".dot");if(d)go(
 $("reset").addEventListener("click",()=>{Object.keys(done).forEach(x=>{if(x.startsWith(L+"-"))delete done[x]});save();render()});
 const ro=new ResizeObserver(arcs);ro.observe($("body"));
 if(document.fonts)document.fonts.ready.then(arcs);
+const strip=h=>{const d=document.createElement("div");d.innerHTML=h;return d.textContent};
+const IDX=[];
+LS.forEach((l,li)=>{
+  l.notes.forEach((n,ni)=>IDX.push({li,kind:"n",i:ni,t:strip(n)}));
+  l.items.forEach((q,qi)=>{
+    const t=q.t==="m"?strip(q.q)+"　"+q.o.map(strip).join(" / ")+"　"+strip(q.ex):q.w.map(w=>w[0]).join(" ")+"　"+q.tr+"　"+strip(q.ex);
+    IDX.push({li,kind:"q",i:qi,t});
+  });
+});
+const esc=x=>x.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function snip(t,q){
+  const lo=t.toLowerCase(),p=lo.indexOf(q.toLowerCase());
+  const a=Math.max(0,p-30),b=Math.min(t.length,p+q.length+50);
+  const s=(a>0?"…":"")+t.slice(a,b)+(b<t.length?"…":"");
+  const i=s.toLowerCase().indexOf(q.toLowerCase());
+  return esc(s.slice(0,i))+"<mark>"+esc(s.slice(i,i+q.length))+"</mark>"+esc(s.slice(i+q.length));
+}
+function search(){
+  const q=$("q").value.trim();
+  $("qx").style.display=q?"block":"none";
+  const h=$("hits");
+  if(!q){h.className="hits";$("main").style.display="";return}
+  const res=IDX.filter(x=>x.t.toLowerCase().includes(q.toLowerCase()));
+  $("main").style.display="none";
+  h.className="hits show";
+  h.innerHTML=`<p class="hitn">「${esc(q)}」の検索結果：${res.length}件${res.length>60?"（先頭60件を表示）":""}</p>`+
+    (res.length?res.slice(0,60).map(x=>`<button class="hit" data-li="${x.li}" data-k="${x.kind}" data-i="${x.i}"><small>${LS[x.li].name}　${x.kind==="n"?"要点":"問題 "+(x.i+1)}</small>${snip(x.t,q)}</button>`).join(""):`<p class="hint">見つかりませんでした。別の言い方や英単語で試してください。</p>`);
+}
+$("q").addEventListener("input",search);
+$("qx").addEventListener("click",()=>{$("q").value="";search();$("q").focus()});
+$("hits").addEventListener("click",e=>{
+  const b=e.target.closest(".hit");if(!b)return;
+  L=+b.dataset.li;act=0;checked=false;
+  if(b.dataset.k==="n"){mode="learn";cur=0}else{mode="drill";cur=+b.dataset.i}
+  $("q").value="";search();render();
+  if(b.dataset.k==="n"){const li=document.querySelectorAll(".notes li")[+b.dataset.i];if(li){li.style.background="var(--chip)";li.scrollIntoView({block:"center"})}}
+  else document.querySelector(".card").scrollIntoView({block:"start"});
+});
 render();
 }
 </script>
